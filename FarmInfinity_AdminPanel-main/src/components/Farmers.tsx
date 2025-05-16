@@ -44,10 +44,7 @@ const Farmers = () => {const navigate = useNavigate();
       }
 
       try {
-        const response = await axios.get("https://dev-api.farmeasytechnologies.com/api/farmers/",{
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+        const response = await axios.get("https://dev-api.farmeasytechnologies.com/api/farmers/", { headers: { Authorization: `Bearer ${token}` },
           params: {
             page: currentPage,
             per_page: farmersPerPage,
