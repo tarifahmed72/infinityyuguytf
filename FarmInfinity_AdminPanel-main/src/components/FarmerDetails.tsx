@@ -2,6 +2,7 @@ import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import FarmerKyc from "./FarmerKyc";
+import { useKeycloak } from "@react-keycloak/web";
 import ScoreCard from "./Scorecard";
 interface Bio {
   id?: string;
@@ -112,6 +113,7 @@ interface POAData {
 const FarmerDetails: React.FC = () => {
   const { farmerId, applicationId } = useParams();
   const [bio, setBio] = useState<Bio | null>(null);
+  const { keycloak } = useKeycloak();
   const [kyc, setKyc] = useState<KYCData | null>(null);
   const [poi, setPoi] = useState<POIData | null>(null);
   const [poa, setPoa] = useState<POAData | null>(null);
@@ -133,7 +135,12 @@ const FarmerDetails: React.FC = () => {
       try {
         // Fetch Bio (Assuming no token required)
         const bioHistoryResponse = await axios.get(
-          `https://dev-api.farmeasytechnologies.com/api/bio-histories/${applicationId}?skip=0&limit=10`
+          `https://dev-api.farmeasytechnologies.com/api/bio-histories/${applicationId}?skip=0&limit=10`,
+          {
+ headers: {
+ "Authorization": `Bearer ${keycloak.token}`
+          }
+ }
         );
 
         if (bioHistoryResponse.data && bioHistoryResponse.data.length > 0) {
@@ -149,7 +156,12 @@ const FarmerDetails: React.FC = () => {
 
         // Fetch KYC
         const kycResponse = await axios.get(
-          `https://dev-api.farmeasytechnologies.com/api/kyc-histories/${farmerId}`
+          `https://dev-api.farmeasytechnologies.com/api/kyc-histories/${farmerId}`,
+          {
+ headers: {
+ "Authorization": `Bearer ${keycloak.token}`
+          }
+ }
         );
         console.log("KYC Response:", kycResponse.data);
 
@@ -164,7 +176,12 @@ const FarmerDetails: React.FC = () => {
         if (poi_id) {
           const poiResponse = await axios.get<POIData>(
             `https://dev-api.farmeasytechnologies.com/api/poi/${poi_id}`
-          );
+ ,
+            {
+ headers: {
+ "Authorization": `Bearer ${keycloak.token}`
+            }
+ }          );
           console.log("POI Response:", poiResponse.data);
           setPoi(poiResponse.data);
         } else {
@@ -175,7 +192,12 @@ const FarmerDetails: React.FC = () => {
         if (poa_id) {
           const poaResponse = await axios.get<POAData>(
             `https://dev-api.farmeasytechnologies.com/api/poa/${poa_id}`
-          );
+ ,
+            {
+ headers: {
+ "Authorization": `Bearer ${keycloak.token}`
+            }
+ }          );
           console.log("POA Response:", poaResponse.data);
           setPoa(poaResponse.data);
         } else {
@@ -192,7 +214,7 @@ const FarmerDetails: React.FC = () => {
     fetchFarmerData();
 
     return () => {};
-  }, [farmerId, applicationId]);
+  }, [farmerId, applicationId, keycloak.token]);
 
   const handleTabClick = (
     tab: "profile" | "kyc" | "scorecard" | "Activity"

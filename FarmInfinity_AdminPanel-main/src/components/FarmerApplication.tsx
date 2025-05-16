@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
 
+import { useKeycloak } from '@react-keycloak/web';
 interface Application {
   id: string;
   farmer_id: string;
@@ -13,6 +14,7 @@ interface Application {
 const FarmerApplication: React.FC = () => {
   const { id: farmerId } = useParams<{ id: string }>();
   const [applications, setApplications] = useState<Application[]>([]);
+  const { keycloak } = useKeycloak();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -23,7 +25,13 @@ const FarmerApplication: React.FC = () => {
         setLoading(true);
         const response = await axios.get(
           `https://dev-api.farmeasytechnologies.com/api/applications/${farmerId}`
-        );
+ ,
+          {
+ headers: {
+ Authorization: `Bearer ${keycloak.token}`,
+            },
+          },
+ );
         setApplications(response.data || []);
       } catch (err) {
         setError('Failed to fetch applications.');

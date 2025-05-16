@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { useState } from 'react';
+import { useKeycloak } from '@react-keycloak/web';
 
 type FarmerKycProps = {
   applicationId?: string;
@@ -13,6 +14,7 @@ type Activity = {
 };
 
 const FarmerKyc: React.FC<FarmerKycProps> = ({ applicationId }) => {
+  const { keycloak } = useKeycloak();
   const [activity, setActivity] = useState<Activity | null>(null);
   const [financialYear, setFinancialYear] = useState('');
   const [loading, setLoading] = useState(false);
@@ -26,8 +28,12 @@ const FarmerKyc: React.FC<FarmerKycProps> = ({ applicationId }) => {
       setErrorMsg('');
       setActivity(null);
 
-      const { data } = await axios.get(`https://dev-api.farmeasytechnologies.com/api/fetch-activity-data/?application_id=${applicationId}&financial_year=${selectedYear}`);
-      
+      const { data } = await axios.get(`https://dev-api.farmeasytechnologies.com/api/fetch-activity-data/?application_id=${applicationId}&financial_year=${selectedYear}`, {
+        headers: {
+          Authorization: `Bearer ${keycloak.token}`,
+        },
+      });
+
       if (!data || Object.keys(data).length === 0) {
         setErrorMsg('No activity data available for selected financial year.');
       } else {
@@ -212,7 +218,7 @@ const FarmerKyc: React.FC<FarmerKycProps> = ({ applicationId }) => {
       {data.facilities?.length > 0 && <p><strong>Facilities:</strong> {data.facilities.map((f: any) => f.facility_name).join(', ')}</p>}
     </div>
   );
-            
+
   const renderByType = (type: string, data: any) => {
     switch (type) {
       case 'Farming':

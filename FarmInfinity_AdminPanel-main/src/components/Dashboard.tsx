@@ -1,11 +1,9 @@
 import  { useState, useEffect } from "react";
 
 import { Loader2 } from "lucide-react";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
 
 const Dashboard = () => {
 
-  const navigate = useNavigate(); // Initialize useNavigate
   
   const [farmerCount, setFarmerCount] = useState<number | null>(25);
   const [fpoCount, setFpoCount] = useState<number | null>(null);
@@ -61,11 +59,6 @@ const Dashboard = () => {
    initKeycloak()
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem("keycloak-token");
-    navigate("/"); // Redirect to home page
-  };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -78,15 +71,6 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-gray-100 p-8">
       <div className="max-w-4xl mx-auto">
-        {/* Logout Button */}
-        <div className="flex justify-end mb-4"> {/* Added div for positioning */}
-          <button
-            onClick={handleLogout}
-            className="bg-red-600 px-4 py-2 rounded text-white hover:bg-red-700" // Basic styling
-          >
-            Logout
-          </button>
-        </div>
         <div className="bg-white shadow-md rounded-lg p-6 mb-8">
           <h1 className="text-2xl font-bold text-gray-800">
             Welcome, Admin 👋

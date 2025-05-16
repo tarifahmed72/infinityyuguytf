@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { useKeycloak } from "@react-keycloak/web";
 interface ApiFarmer {
-  id: string;
+  id: number;
   farmer_id: string;
   phone_no: string;
   referral_id: string | null;
@@ -14,6 +15,7 @@ interface ApiFarmer {
 }
 const Farmers = () => {
   const navigate = useNavigate();
+  const { keycloak, initialized } = useKeycloak();
 
   const hardcodedFarmers = [
     {
@@ -66,12 +68,14 @@ const Farmers = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const farmersPerPage = 5;
+  const [totalFarmers, setTotalFarmers] = useState(0);
 
   useEffect(() => {
     const fetchFarmers = async () => {
-      const token = localStorage.getItem("keycloak-token");
+      const token = keycloak.token;
 
       if (!token) {
         setError("No auth token found. Please login again.");
@@ -80,37 +84,45 @@ const Farmers = () => {
       }
 
       try {
-        const response = await axios.get("https://dev-api.farmeasytechnologies.com/api/farmers/", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        if (initialized) {
+          const response = await axios.get(
+            "https://dev-api.farmeasytechnologies.com/api/farmers/",
+            {
+              params: {
+                page: currentPage, // Use 'page' instead of 'skip'
+                limit: farmersPerPage, // Use 'limit'
+              },
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+          // Adjust the data mapping to match the API response structure
+          const fetchedFarmers = response.data.data.map((farmer: ApiFarmer) => ({
+            id: farmer.id,
+            name: farmer.name || "N/A", // Handle cases where name is null
+            gender: "N/A", // Gender is not present in the API response
+            phone: farmer.phone_no,
+            city: farmer.village || "N/A", // Assuming 'village' maps to city
+            createdOn: new Date(farmer.created_at).toLocaleDateString(), // Format the date
+            status: getStatusText(farmer.status), // Function to convert status code to text
+            approval: "N/A", // Approval is not present in the API response
+            amount: "N/A", // Amount is not present in the API response
+            // You might need to fetch additional details for gender, approval, and amount
+          }));
 
-        // Adjust the data mapping to match the API response structure
-        const fetchedFarmers = response.data.data.map((farmer: ApiFarmer) => ({
-          id: farmer.id,
-          name: farmer.name || "N/A", // Handle cases where name is null
-          gender: "N/A", // Gender is not present in the API response
-          phone: farmer.phone_no,
-          city: farmer.village || "N/A", // Assuming 'village' maps to city
-          createdOn: new Date(farmer.created_at).toLocaleDateString(), // Format the date
-          status: getStatusText(farmer.status), // Function to convert status code to text
-          approval: "N/A", // Approval is not present in the API response
-          amount: "N/A", // Amount is not present in the API response
-          // You might need to fetch additional details for gender, approval, and amount
-        }));
-
-        setFarmers([...hardcodedFarmers, ...fetchedFarmers]);
+          setFarmers(fetchedFarmers); // Replace hardcoded data with fetched data
+          setTotalFarmers(response.data.total); // Assuming API returns total count
+        }
       } catch (err) {
         console.error("Error fetching farmers:", err);
         setError("Failed to fetch farmer data. Check token or permissions.");
       } finally {
         setLoading(false);
       }
-    };
-
+    }; 
     fetchFarmers();
-  }, []);
+  }, [currentPage]); // Refetch data when currentPage changes
 
   const getStatusText = (status: Number|null) => {
     switch (status) {
@@ -124,18 +136,11 @@ const Farmers = () => {
     }
   };
 
-  // Filtered farmers based on search query
-  const filteredFarmers = farmers.filter(
-    (farmer) =>
-      (farmer.name && farmer.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      farmer.phone.includes(searchQuery)
-  );
-
-  // Pagination logic
-  const indexOfLastFarmer = currentPage * farmersPerPage;
-  const indexOfFirstFarmer = indexOfLastFarmer - farmersPerPage;
-  const currentFarmers = filteredFarmers.slice(indexOfFirstFarmer, indexOfLastFarmer);
-  const totalPages = Math.ceil(filteredFarmers.length / farmersPerPage);
+  // The API is handling pagination and potentially filtering, so we don't need to filter
+  // the 'farmers' array here.
+  const currentFarmers = farmers; // API is handling pagination now, no need to filter again here
+  // Calculate total pages based on total farmers fetched from API
+  const totalPages = Math.ceil(totalFarmers / farmersPerPage);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -217,7 +222,7 @@ const Farmers = () => {
               ⬅ Prev
             </button>
             <span className="px-3 py-1">
-              Page {currentPage} of {totalPages}
+ Page {currentPage} of {Math.ceil(totalFarmers / farmersPerPage) || 1} {/* Handle case where totalFarmers is 0 */}
             </span>
             <button
               disabled={currentPage === totalPages}
