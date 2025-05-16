@@ -135,13 +135,10 @@ const FarmerDetails: React.FC = () => {
       try {
         // Fetch Bio (Assuming no token required)
         const bioHistoryResponse = await axios.get(
-          `https://dev-api.farmeasytechnologies.com/api/bio-histories/${applicationId}?skip=0&limit=10`,
-          {
- headers: {
- "Authorization": `Bearer ${keycloak.token}`
+ `https://dev-api.farmeasytechnologies.com/api/bio-histories/${applicationId}?skip=0&limit=10`, {
+ headers: { "Authorization": `Bearer ${keycloak.token}` }
           }
- }
-        );
+ );
 
         if (bioHistoryResponse.data && bioHistoryResponse.data.length > 0) {
           const bio_version_id = bioHistoryResponse.data[0].bio_version_id;
@@ -156,11 +153,8 @@ const FarmerDetails: React.FC = () => {
 
         // Fetch KYC
         const kycResponse = await axios.get(
-          `https://dev-api.farmeasytechnologies.com/api/kyc-histories/${farmerId}`,
-          {
- headers: {
- "Authorization": `Bearer ${keycloak.token}`
-          }
+ `https://dev-api.farmeasytechnologies.com/api/kyc-histories/${farmerId}`, {
+ headers: { "Authorization": `Bearer ${keycloak.token}` }
  }
         );
         console.log("KYC Response:", kycResponse.data);
@@ -176,12 +170,8 @@ const FarmerDetails: React.FC = () => {
         if (poi_id) {
           const poiResponse = await axios.get<POIData>(
             `https://dev-api.farmeasytechnologies.com/api/poi/${poi_id}`
- ,
-            {
- headers: {
- "Authorization": `Bearer ${keycloak.token}`
-            }
- }          );
+ , {
+ headers: { "Authorization": `Bearer ${keycloak.token}` } });
           console.log("POI Response:", poiResponse.data);
           setPoi(poiResponse.data);
         } else {
@@ -192,12 +182,8 @@ const FarmerDetails: React.FC = () => {
         if (poa_id) {
           const poaResponse = await axios.get<POAData>(
             `https://dev-api.farmeasytechnologies.com/api/poa/${poa_id}`
- ,
-            {
- headers: {
- "Authorization": `Bearer ${keycloak.token}`
-            }
- }          );
+ , {
+ headers: { "Authorization": `Bearer ${keycloak.token}` } });
           console.log("POA Response:", poaResponse.data);
           setPoa(poaResponse.data);
         } else {

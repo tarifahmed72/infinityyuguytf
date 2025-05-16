@@ -25,13 +25,8 @@ const FarmerApplication: React.FC = () => {
         setLoading(true);
         const response = await axios.get(
           `https://dev-api.farmeasytechnologies.com/api/applications/${farmerId}`
- ,
-          {
- headers: {
- Authorization: `Bearer ${keycloak.token}`,
-            },
-          },
- );
+ , { headers: { Authorization: `Bearer ${keycloak.token}` } }
+        );
         setApplications(response.data || []);
       } catch (err) {
         setError('Failed to fetch applications.');

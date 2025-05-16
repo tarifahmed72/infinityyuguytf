@@ -28,12 +28,11 @@ const FarmerKyc: React.FC<FarmerKycProps> = ({ applicationId }) => {
       setErrorMsg('');
       setActivity(null);
 
-      const { data } = await axios.get(`https://dev-api.farmeasytechnologies.com/api/fetch-activity-data/?application_id=${applicationId}&financial_year=${selectedYear}`, {
-        headers: {
-          Authorization: `Bearer ${keycloak.token}`,
-        },
+      const { data } = await axios.get(
+        `https://dev-api.farmeasytechnologies.com/api/fetch-activity-data/?application_id=${applicationId}&financial_year=${selectedYear}`,
+ {
+        headers: { Authorization: `Bearer ${keycloak.token}` },
       });
-
       if (!data || Object.keys(data).length === 0) {
         setErrorMsg('No activity data available for selected financial year.');
       } else {
