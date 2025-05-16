@@ -31,8 +31,7 @@ const Farmers = () => {const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const farmersPerPage = 5;
+  const [currentPage, setCurrentPage] = useState(1);  const farmersPerPage = 100; // Display 100 farmers per page
 
   useEffect(() => {
     const fetchFarmers = async () => {
@@ -45,9 +44,13 @@ const Farmers = () => {const navigate = useNavigate();
       }
 
       try {
-        const response = await axios.get("https://dev-api.farmeasytechnologies.com/api/farmers/", {
+        const response = await axios.get("https://dev-api.farmeasytechnologies.com/api/farmers/",{
           headers: {
             Authorization: `Bearer ${token}`,
+          },
+          params: {
+            page: currentPage,
+            per_page: farmersPerPage,
           },
         });
 
@@ -65,7 +68,7 @@ const Farmers = () => {const navigate = useNavigate();
           // You might need to fetch additional details for gender, approval, and amount
         }));
 
-        setFarmers(fetchedFarmers); // Use only fetched farmers
+        setFarmers(fetchedFarmers);
       } catch (err) {
         console.error("Error fetching farmers:", err);
         setError("Failed to fetch farmer data. Check token or permissions.");
@@ -74,7 +77,7 @@ const Farmers = () => {const navigate = useNavigate();
       }
     };
 
-    fetchFarmers();
+    fetchFarmers(); // Fetch farmers whenever currentPage or farmersPerPage changes
   }, []);
 
   const getStatusText = (status: Number|null) => {
@@ -89,15 +92,11 @@ const Farmers = () => {const navigate = useNavigate();
     }
   };
 
-  // Filtered farmers based on search query
-  const filteredFarmers = farmers.filter( // Type is now inferred from the farmers state
-    (farmer) =>
-      (farmer.name && farmer.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      farmer.phone.includes(searchQuery)
-  );
+  const filteredFarmers = farmers.filter((farmer) => // Filter on the current page's farmers
+    (farmer.name && farmer.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+    farmer.phone.includes(searchQuery));
 
-  // Pagination logic
-  const indexOfLastFarmer = currentPage * farmersPerPage;
+  const indexOfLastFarmer = currentPage * farmersPerPage; // Calculate index of last farmer on the current page
   const indexOfFirstFarmer = indexOfLastFarmer - farmersPerPage;
   const currentFarmers = filteredFarmers.slice(indexOfFirstFarmer, indexOfLastFarmer);
   const totalPages = Math.ceil(filteredFarmers.length / farmersPerPage);
@@ -183,7 +182,7 @@ const Farmers = () => {const navigate = useNavigate();
             </button>
             <span className="px-3 py-1">
               Page {currentPage} of {totalPages}
-            </span>
+            </span>\n
             <button
               disabled={currentPage === totalPages}
               onClick={() => setCurrentPage((prev) => prev + 1)}
