@@ -12,57 +12,22 @@ interface ApiFarmer {
   created_at: string;
   updated_at: string;
 }
-const Farmers = () => {
-  const navigate = useNavigate();
 
-  const hardcodedFarmers = [
-    {
-      id: 1,
-      name: "Kaustav",
-      gender: "Male",
-      phone: "8399051459",
-      city: "",
-      createdOn: "11-Nov-2024",
-      status: "Lead",
-      approval: "None",
-      amount: "",
-    },
-    {
-      id: 2,
-      name: "Pragyan",
-      gender: "Male",
-      phone: "7575985255",
-      city: "",
-      createdOn: "28-Aug-2024",
-      status: "Lead",
-      approval: "None",
-      amount: "",
-    },
-    {
-      id: 3,
-      name: "Santanu",
-      gender: "Male",
-      phone: "8011051894",
-      city: "",
-      createdOn: "28-Aug-2024",
-      status: "Lead",
-      approval: "None",
-      amount: "",
-    },
-    {
-      id: 4,
-      name: "Anant",
-      gender: "Male",
-      phone: "8822009123",
-      city: "Golaghat",
-      createdOn: "15-Jul-2024",
-      status: "Lead",
-      approval: "None",
-      amount: "Rs.5,000-Rs.10,000",
-    },
-  ];
+interface Farmer {
+  id: string;
+  name: string;
+  phone: string;
+  gender: string;
+  city: string;
+  createdOn: string;
+  status: string;
+  approval: string;
+  amount: string;
+}
 
-  const [farmers, setFarmers] = useState(hardcodedFarmers);
+const Farmers = () => {const navigate = useNavigate();
+
+  const [farmers, setFarmers] = useState<Farmer[]>([]); // Initialize with empty array and specify type
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -100,7 +65,7 @@ const Farmers = () => {
           // You might need to fetch additional details for gender, approval, and amount
         }));
 
-        setFarmers([...hardcodedFarmers, ...fetchedFarmers]);
+        setFarmers(fetchedFarmers); // Use only fetched farmers
       } catch (err) {
         console.error("Error fetching farmers:", err);
         setError("Failed to fetch farmer data. Check token or permissions.");
@@ -125,7 +90,7 @@ const Farmers = () => {
   };
 
   // Filtered farmers based on search query
-  const filteredFarmers = farmers.filter(
+  const filteredFarmers = farmers.filter( // Type is now inferred from the farmers state
     (farmer) =>
       (farmer.name && farmer.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
       farmer.phone.includes(searchQuery)
