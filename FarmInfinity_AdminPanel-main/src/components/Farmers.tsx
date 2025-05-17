@@ -36,6 +36,12 @@ const Farmers = () => {
   const [farmersPerPage, setFarmersPerPage] = useState(100); // Display 100 farmers per page by default
 
   useEffect(() => {
+    const token = localStorage.getItem("keycloak-token");
+    if (!token) {
+      navigate("/"); // Redirect to login page if no token is found
+      return;
+    }
+
     const fetchFarmers = async () => {
       const token = localStorage.getItem("keycloak-token");
 
@@ -82,7 +88,7 @@ const Farmers = () => {
     };
 
     fetchFarmers(); // Fetch farmers whenever currentPage or farmersPerPage changes
-  }, []);
+  }, [currentPage, farmersPerPage, navigate]); // Add navigate to dependency array
 
   // Function to convert status code to text
   const getStatusText = (status: Number|null) => {
